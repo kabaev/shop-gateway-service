@@ -1,0 +1,41 @@
+server:
+  port: 9090
+
+keeper:
+  service:
+    baseurl: http://localhost:8080
+
+customer:
+  service:
+    baseurl: http://localhost:8081
+
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay
+      routes:
+        - id: keeper-service
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/v1/products/**
+  security:
+    oauth2:
+      client:
+        provider:
+          shop-gateway-service-provider:
+            issuer-uri: http://localhost:9091/auth/realms/Shop-App
+
+        registration:
+          shop-gateway-service-client:
+            provider: shop-gateway-service-provider
+            client-id: shop-gateway-service
+            client-secret: 67c1e5e0-be9a-4097-9848-905ec0c9cae4
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
